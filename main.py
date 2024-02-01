@@ -2,6 +2,7 @@ import tkinter as tk
 from function import *
 from PIL import Image, ImageTk
 from tkinter import ttk
+from object import FileList
 
 def open_file(file_path, label): 
 
@@ -61,21 +62,11 @@ def show_main_screen():
 
     main_screen.mainloop()
 
-# Real time update -  napraviti 
 def show_file_list(filepath, label):
     
+    file_list = FileList(label, filepath)
+    file_list.create_widget()
 
-    file_list_screen = tk.Tk()
-    file_list_screen.title("File list")
-    max_width = max(len(file) for file in filepath)
-    file_list = tk.Listbox(file_list_screen, selectmode=tk.SINGLE, width=max_width+2)
-    file_list.delete(0, tk.END)
-    file_list.pack()
-    for file in filepath:
-        file_list.insert(tk.END, file)
-
-    file_list.bind("<<ListboxSelect>>", lambda event: open_image(event, file_list, label))
-    file_list_screen.mainloop()  
 
 if __name__ == "__main__":
     show_main_screen()

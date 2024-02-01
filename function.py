@@ -7,20 +7,18 @@ from tkinter import messagebox
 import numpy as np
 import keras 
 from sklearn.preprocessing import LabelEncoder
-import pandas
 import matplotlib.pyplot as plt 
 from PIL import Image, ImageTk
 from tkinter import filedialog
-from main import show_file_list
 import shutil
 
-
-    
 def move_file(source_filepath, prediction):
+
     destination_path = f"Slike\{prediction}"
 
     try:
         shutil.move(source_filepath, destination_path)
+
     except Exception as e:
         print(f"An error occurred: {e}")
 
@@ -80,7 +78,7 @@ def next_picture(directory, photo_label_text, photo_label):
             photo_label.image = photo,
 
 def get_image_paths(directory):
-
+    
     image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp"]
     photo_paths = []
 
@@ -258,15 +256,3 @@ def upload_file(photo_entry: str):
         filepath = os.path.abspath(filename)
         photo_entry.delete(0, END)
         photo_entry.insert(tk.END, filepath)     
-        show_file_list(filepath)
-
-def open_image(event, listbox, label):
-
-    selected_index = listbox.curselection()
-    if selected_index:
-
-        selected_item = listbox.get(selected_index)
-        image = Image.open(selected_item)
-        photo = ImageTk.PhotoImage(image)
-        label.config(image=photo, text = f"{selected_item}")
-        label.image = photo

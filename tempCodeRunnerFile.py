@@ -1,1 +1,2 @@
-photo_entry
+correct_button = tk.Button(supplementary_photo_label_frame_2, text="Correct", command= lambda: move_file(photo_label.cget("text"),predicted_number_label.cget("text")))
+    correct_button.pack(padx=5, pady=5)
