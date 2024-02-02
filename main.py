@@ -4,12 +4,9 @@ from PIL import Image, ImageTk
 from tkinter import ttk
 from object import FileList
 
-def open_file(file_path, label): 
-
-    file_paths = get_image_paths(file_path)
-    show_file_list(file_paths, label)
 
 def show_main_screen():
+    
     
     main_screen = tk.Tk()
     main_screen.title("HRS")
@@ -50,11 +47,11 @@ def show_main_screen():
 
     previous_button = tk.Button(supplementary_photo_label_frame_1, text=" Previous photo", command=lambda: previous_picture(photo_entry.get(),photo_label.cget("text"), photo_label))
     previous_button.pack(padx=5, pady=5)
-
-    open_button = tk.Button(button_label_frame, text="Open", command=lambda: open_file(photo_entry.get(), photo_label))
+    file_list = FileList(photo_label)
+    open_button = tk.Button(button_label_frame, text="Open", command=lambda: file_list.create_widget(open_file(photo_entry.get())))
     open_button.grid(row=1, column=1, padx=5, pady=5)
 
-    correct_button = tk.Button(supplementary_photo_label_frame_2, text="Correct", command= lambda: move_file(photo_label.cget("text"),predicted_number_label.cget("text")))
+    correct_button = tk.Button(supplementary_photo_label_frame_2, text="Correct", command= lambda:  move_file(photo_label.cget("text"),predicted_number_label.cget("text"), file_list,photo_entry.get()))
     correct_button.pack(padx=5, pady=5)
 
     wrong_button = tk.Button(supplementary_photo_label_frame_2, text="Wrong", command= lambda: wrong(photo_label.cget("text")))
@@ -62,11 +59,8 @@ def show_main_screen():
 
     main_screen.mainloop()
 
-def show_file_list(filepath, label):
     
-    file_list = FileList(label, filepath)
-    file_list.create_widget()
-
+    
 
 if __name__ == "__main__":
     show_main_screen()

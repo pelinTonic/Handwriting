@@ -12,13 +12,19 @@ from PIL import Image, ImageTk
 from tkinter import filedialog
 import shutil
 
-def move_file(source_filepath, prediction):
+def open_file(file_path): 
+
+    file_paths = get_image_paths(file_path)
+    
+    return file_paths
+
+def move_file(source_filepath, prediction, file_list, filepaths):
 
     destination_path = f"Slike\{prediction}"
-
+    
     try:
         shutil.move(source_filepath, destination_path)
-
+        file_list.update_list(open_file(filepaths))
     except Exception as e:
         print(f"An error occurred: {e}")
 
