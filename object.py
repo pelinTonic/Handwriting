@@ -9,19 +9,22 @@ class FileList:
 
     def create_widget(self, filepath):
 
-        self.filepath = filepath
+        if filepath == None:
+            pass
+        else:
+            self.filepath = filepath
 
-        max_width = max(len(file) for file in filepath)
-        self.new_window = tk.Tk()
-        self.new_window.title("List of test files")
+            max_width = max(len(file) for file in filepath)
+            self.new_window = tk.Tk()
+            self.new_window.title("List of test files")
 
-        self.filelist = tk.Listbox(self.new_window, selectmode=tk.SINGLE, width=max_width + 2)
-        self.filelist.pack()
+            self.filelist = tk.Listbox(self.new_window, selectmode=tk.SINGLE, width=max_width + 2)
+            self.filelist.pack()
 
-        for file in filepath:
-            self.filelist.insert(tk.END, file)
+            for file in filepath:
+                self.filelist.insert(tk.END, file)
 
-        self.filelist.bind("<<ListboxSelect>>", self.open_image)
+            self.filelist.bind("<<ListboxSelect>>", self.open_image)
 
     def open_image(self, event):
 

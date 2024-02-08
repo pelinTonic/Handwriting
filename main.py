@@ -54,7 +54,7 @@ def show_main_screen():
     correct_button = tk.Button(supplementary_photo_label_frame_2, text="Correct", command= lambda:  move_file(photo_label.cget("text"),predicted_number_label.cget("text"), file_list,photo_entry.get()))
     correct_button.pack(padx=5, pady=5)
 
-    wrong_button = tk.Button(supplementary_photo_label_frame_2, text="Wrong", command= lambda: wrong(photo_label.cget("text")))
+    wrong_button = tk.Button(supplementary_photo_label_frame_2, text="Wrong", command= lambda: wrong(photo_label.cget("text"),file_list,photo_entry.get()))
     wrong_button.pack(padx=5, pady=5)
 
     main_screen.mainloop()

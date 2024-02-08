@@ -13,10 +13,12 @@ from tkinter import filedialog
 import shutil
 
 def open_file(file_path): 
-
-    file_paths = get_image_paths(file_path)
+    if file_path == "":
+        pass
+    else:
+        file_paths = get_image_paths(file_path)
     
-    return file_paths
+        return file_paths
 
 def move_file(source_filepath, prediction, file_list, filepaths):
 
@@ -28,7 +30,7 @@ def move_file(source_filepath, prediction, file_list, filepaths):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-def wrong(filepath):
+def wrong(filepath, file_list, filepaths):
 
     wrong_window = tk.Tk()
     wrong_window.title("Correction")
@@ -42,7 +44,7 @@ def wrong(filepath):
     number_entry = tk.Entry(wrong_window_label_frame)
     number_entry.grid(row=0, column=1, padx=5, pady=5)
 
-    correct_button = tk.Button(wrong_window, text="Make correction", command= lambda: move_file(filepath, number_entry.get()))
+    correct_button = tk.Button(wrong_window, text="Make correction", command= lambda: (move_file(filepath, number_entry.get(), file_list, filepaths),wrong_window.destroy()))
     correct_button.pack(padx=5, pady=5)
 
     wrong_window.mainloop()
@@ -164,7 +166,7 @@ def predict_number(photo_path: str) -> np.ndarray:
     img = cv2.imread(photo_path, cv2.IMREAD_GRAYSCALE)
     resized_img = resize_img(img)
     resized_img = np.expand_dims(resized_img, axis=0)
-    model = keras.models.load_model("0.9186046719551086.keras")
+    model = keras.models.load_model("0.9178683161735535.keras")
     labels = [0,1, 2, 3, 4, 5, 6, 7, 8, 9]
     label_encoder = LabelEncoder()
     label_encoder.fit_transform(labels)
@@ -240,9 +242,12 @@ def select_directory(photo_entry):
     if directory_path:
         photo_paths = get_image_paths(directory_path)
         if photo_paths:
-            photo_entry.delete(0, END)
-            photo_entry.insert(tk.END, directory_path)
-            return photo_paths
+            if photo_paths == []:
+                error("U mapi ne postoje datoteke")
+            else:
+                photo_entry.delete(0, END)
+                photo_entry.insert(tk.END, directory_path)
+                return photo_paths
 
 def upload_file(photo_entry: str):
 
