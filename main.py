@@ -58,9 +58,6 @@ def show_main_screen():
     wrong_button.pack(padx=5, pady=5)
 
     main_screen.mainloop()
-
-    
-    
-
+ 
 if __name__ == "__main__":
     show_main_screen()

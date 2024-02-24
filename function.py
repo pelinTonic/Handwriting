@@ -12,6 +12,37 @@ from PIL import Image, ImageTk
 from tkinter import filedialog
 import shutil
 
+def find_numbers(imgs):
+
+    img = cv2.imread(imgs, cv2.IMREAD_GRAYSCALE)
+
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    img = clahe.apply(img)
+    
+    value, thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    rois = []
+
+    for contour in contours:
+        
+         
+        area = cv2.contourArea(contour)
+
+        # Filter out contours based on area
+        if area < 100:
+            continue
+    
+        x, y, w, h = cv2.boundingRect(contour)
+
+    
+        roi = img[y:y+h, x:x+w]
+
+        roi = cv2.resize(roi, (32, 32), interpolation=cv2.INTER_AREA)
+        
+        rois.append(roi)
+
+    return rois
+
 def open_file(file_path): 
     if file_path == "":
         pass
@@ -50,40 +81,40 @@ def wrong(filepath, file_list, filepaths):
     wrong_window.mainloop()
 
 def previous_picture(directory, photo_label_text, photo_label):
-    
+   
     photo_paths = get_image_paths(directory)
     if photo_label_text in photo_paths:
 
         try: 
             index = photo_paths.index(photo_label_text)
             image = Image.open(photo_paths[index-1])
-            photo = ImageTk.PhotoImage(image)
-            photo_label.config(image=photo, text = f"{photo_paths[index-1]}")
-            photo_label.image = photo
+
 
         except IndexError:
             image = Image.open(photo_paths[0])
-            photo = ImageTk.PhotoImage(image)
-            photo_label.config(image=photo, text = f"{photo_paths[0]}")
-            photo_label.image = photo,
+
+        image = Image.open(photo_paths[0])
+
+    photo = ImageTk.PhotoImage(image)
+    photo_label.config(image=photo, text = f"{photo_paths[0]}")
+    photo_label.image = photo
     
 def next_picture(directory, photo_label_text, photo_label):
-    
+  
     photo_paths = get_image_paths(directory)
     if photo_label_text in photo_paths:
 
         try: 
             index = photo_paths.index(photo_label_text)
             image = Image.open(photo_paths[index+1])
-            photo = ImageTk.PhotoImage(image)
-            photo_label.config(image=photo, text = f"{photo_paths[index+1]}")
-            photo_label.image = photo
 
         except IndexError:
             image = Image.open(photo_paths[0])
-            photo = ImageTk.PhotoImage(image)
-            photo_label.config(image=photo, text = f"{photo_paths[0]}")
-            photo_label.image = photo,
+    else:
+        image = Image.open(photo_paths[0])
+    photo = ImageTk.PhotoImage(image)
+    photo_label.config(image=photo, text = f"{photo_paths[0]}")
+    photo_label.image = photo
 
 def get_image_paths(directory):
     
@@ -146,7 +177,6 @@ def show_predicted_data(label: tk.Label, photo_entry: str):
     plot_bar_chart(predicted_percentages)
 
 def predict_number(photo_path: str) -> np.ndarray:
-
     """
     This function predicts the digit (0-9) in a given image.
 
@@ -154,7 +184,7 @@ def predict_number(photo_path: str) -> np.ndarray:
     photo_path (str): The file path to the image.
 
     Returns:
-    predicted_labels (np.ndarray): The predicted label for the digit in the image.
+    predicted_labels (List[np.ndarray]): The predicted labels for the digits in the image.
 
     The function works as follows:
     - Reads the image from the provided path in grayscale.
@@ -163,17 +193,25 @@ def predict_number(photo_path: str) -> np.ndarray:
     - Makes a prediction using the model.
     - Returns the label of the digit with the highest confidence.
     """
-    img = cv2.imread(photo_path, cv2.IMREAD_GRAYSCALE)
-    resized_img = resize_img(img)
-    resized_img = np.expand_dims(resized_img, axis=0)
-    model = keras.models.load_model("0.9178683161735535.keras")
-    labels = [0,1, 2, 3, 4, 5, 6, 7, 8, 9]
-    label_encoder = LabelEncoder()
-    label_encoder.fit_transform(labels)
-    predictions = model.predict(resized_img)
-    predicted_labels = label_encoder.inverse_transform(np.argmax(predictions, axis=1))
-    
-    return predicted_labels[0]
+
+    numbers = find_numbers(photo_path)
+    predicted_labels = []
+    for number in numbers:
+        cv2.imshow('Result',number)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        number = resize_img(number)
+        number = np.expand_dims(number, axis=0)
+        model = keras.models.load_model("0.9666666388511658.keras")
+        labels = [0,1, 2, 3, 4, 5, 6, 7, 8, 9]
+        label_encoder = LabelEncoder()
+        label_encoder.fit_transform(labels)
+        predictions = model.predict(number)
+        predicted_label = label_encoder.inverse_transform(np.argmax(predictions, axis=1))
+        predicted_labels.append(predicted_label)
+    print(predicted_labels)
+    return predicted_labels
+
 
 def predict_number_percentages(photo_path: str) -> np.ndarray:
 
@@ -198,7 +236,7 @@ def predict_number_percentages(photo_path: str) -> np.ndarray:
     img = cv2.imread(photo_path, cv2.IMREAD_GRAYSCALE)
     resized_img = resize_img(img)
     resized_img = np.expand_dims(resized_img, axis=0)
-    model = keras.models.load_model("0.9186046719551086.keras")
+    model = keras.models.load_model("0.9666666388511658.keras")
     labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     label_encoder = LabelEncoder()
     label_encoder.fit_transform(labels)
@@ -222,7 +260,7 @@ def resize_img(photo: np.ndarray):
         np.ndarray: The resized and normalized image with an extra dimension added.
     """
 
-    resized_img = cv2.resize(photo, (28, 28))
+    resized_img = cv2.resize(photo, (32, 32))
     resized_img = resized_img / 255.0
     resized_img = np.expand_dims(resized_img, axis=-1)
 

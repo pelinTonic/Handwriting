@@ -1,2 +1,6 @@
-correct_button = tk.Button(supplementary_photo_label_frame_2, text="Correct", command= lambda: move_file(photo_label.cget("text"),predicted_number_label.cget("text")))
-    correct_button.pack(padx=5, pady=5)
+for roi in rois:
+
+    col_splits_resized = cv2.resize(roi,(32,32))
+    col_splits_resized = col_splits_resized / 255.0
+    col_splits_resized = np.expand_dims(col_splits_resized, axis=0)
+    print(predict(col_splits_resized))
