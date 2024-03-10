@@ -28,7 +28,7 @@ def find_numbers(imgs):
          
         area = cv2.contourArea(contour)
 
-        # Filter out contours based on area
+
         if area < 100:
             continue
     
@@ -39,9 +39,10 @@ def find_numbers(imgs):
 
         roi = cv2.resize(roi, (32, 32), interpolation=cv2.INTER_AREA)
         
-        rois.append(roi)
+        rois.append((x, roi))
+    rois.sort(key=lambda x: x[0])
 
-    return rois
+    return [roi for _, roi in rois]
 
 def open_file(file_path): 
     if file_path == "":
@@ -169,12 +170,20 @@ def show_predicted_data(label: tk.Label, photo_entry: str):
     - Updates the provided label with the predicted digit.
     - Calls the `plot_bar_chart` function to display a bar chart of the confidence percentages.
     """
-     
+    
     predicted_percentages = predict_number_percentages(photo_entry)
+    confidence = min(predicted_percentages)
     predicted_number = predict_number(photo_entry)
-    label.config(text=f"{predicted_number}")
 
-    plot_bar_chart(predicted_percentages)
+    numbers = []
+    for number in predicted_number:
+        number = number.tolist()
+        numbers.extend(number)
+
+    strings = [str(num) for num in numbers]
+    numbers_string = "".join(strings)
+
+    label.config(text=f"Predicted number: {numbers_string} with {confidence}% confidence")
 
 def predict_number(photo_path: str) -> np.ndarray:
     """
@@ -202,16 +211,15 @@ def predict_number(photo_path: str) -> np.ndarray:
         cv2.destroyAllWindows()
         number = resize_img(number)
         number = np.expand_dims(number, axis=0)
-        model = keras.models.load_model("0.9666666388511658.keras")
+        model = keras.models.load_model("0.9380378723144531.keras")
         labels = [0,1, 2, 3, 4, 5, 6, 7, 8, 9]
         label_encoder = LabelEncoder()
         label_encoder.fit_transform(labels)
         predictions = model.predict(number)
         predicted_label = label_encoder.inverse_transform(np.argmax(predictions, axis=1))
         predicted_labels.append(predicted_label)
-    print(predicted_labels)
-    return predicted_labels
 
+    return predicted_labels
 
 def predict_number_percentages(photo_path: str) -> np.ndarray:
 
@@ -232,20 +240,25 @@ def predict_number_percentages(photo_path: str) -> np.ndarray:
     - Calculates the confidence percentages for each class.
     - Returns a dictionary mapping each label to its corresponding confidence percentage.
     """
+    
+    numbers = find_numbers(photo_path)
+    confidence_labels = []
 
-    img = cv2.imread(photo_path, cv2.IMREAD_GRAYSCALE)
-    resized_img = resize_img(img)
-    resized_img = np.expand_dims(resized_img, axis=0)
-    model = keras.models.load_model("0.9666666388511658.keras")
-    labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    label_encoder = LabelEncoder()
-    label_encoder.fit_transform(labels)
-    predictions = model.predict(resized_img)
-    num_classes = predictions.shape[1]
-    confidence_percentages = [predictions[0][i] * 100 for i in range(num_classes)]
-    result_dict = {label: confidence for label, confidence in zip(labels, confidence_percentages)}
+    for number in numbers:
+        resized_img = resize_img(number)
+        resized_img = np.expand_dims(resized_img, axis=0)
+        model = keras.models.load_model("0.9380378723144531.keras")
+        labels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        label_encoder = LabelEncoder()
+        label_encoder.fit_transform(labels)
+        predictions = model.predict(resized_img)
+        num_classes = predictions.shape[1]
+        confidence_percentages = [predictions[0][i] * 100 for i in range(num_classes)]
+        result_dict = {label: confidence for label, confidence in zip(labels, confidence_percentages)}
 
-    return result_dict
+        confidence_labels.append(max(result_dict.values()))
+
+    return confidence_labels
 
 def resize_img(photo: np.ndarray):
     """
